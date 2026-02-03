@@ -3,8 +3,8 @@ main = "src/index.ts"
 compatibility_date = "2024-10-01"
 
 [vars]
-LEGACY_ORIGIN = "https://legacy.example.org"
-NEW_APP_ORIGIN = "https://new.packxyz.org"
+LEGACY_ORIGIN = "https://austinpack162.com/"
+NEW_APP_ORIGIN = "https://pack162.justin-matthew-daniel1.workers.dev"
 
 [observability]
 enabled = true
