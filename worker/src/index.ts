@@ -3,11 +3,10 @@ import { buildRewriter } from "./rewriter";
 type Env = {
   LEGACY_ORIGIN: string;
   NEW_APP_ORIGIN: string;
-  ASSETS?: Fetcher;
 };
 
-const HTML_REWRITE_PATHS = ["/", "/home", "/node/2"];
-const NEW_APP_PATHS = ["/", "/home", "/node/2"];
+const HTML_REWRITE_PATHS = ["/home", "/node/2"];
+const NEW_APP_PATHS = ["/home", "/node/2"];
 const NEW_APP_PREFIXES = ["/assets", "/_static"];
 
 const isHtmlRequest = (request: Request) => {
@@ -83,19 +82,9 @@ const handleProxy = async (request: Request, env: Env) => {
 };
 
 const handleNewApp = async (request: Request, env: Env) => {
-  if (env.ASSETS) {
-    return env.ASSETS.fetch(request);
-  }
-  return new Response(
-    "Modern app assets are missing. Build the web app and redeploy the Worker.",
-    {
-      status: 503,
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-store",
-      },
-    }
-  );
+  const url = new URL(request.url);
+  const targetUrl = new URL(url.pathname + url.search, env.NEW_APP_ORIGIN);
+  return fetch(targetUrl.toString(), request);
 };
 
 export default {
