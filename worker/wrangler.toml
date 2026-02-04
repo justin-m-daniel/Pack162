@@ -1,4 +1,4 @@
-name = "pack-legacy-proxy"
+name = "pack162"
 main = "src/index.ts"
 compatibility_date = "2024-10-01"
 
@@ -8,6 +8,3 @@ NEW_APP_ORIGIN = "https://pack162.justin-matthew-daniel1.workers.dev"
 
 [observability]
 enabled = true
-
-[assets]
-directory = "../apps/web/dist"
