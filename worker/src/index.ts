@@ -19,6 +19,16 @@ const isHtmlResponse = (response: Response) => {
   return contentType.includes("text/html");
 };
 
+const isRedirectResponse = (response: Response) => {
+  return (
+    response.status === 301 ||
+    response.status === 302 ||
+    response.status === 303 ||
+    response.status === 307 ||
+    response.status === 308
+  );
+};
+
 const withSafeHeaders = (response: Response) => {
   const headers = new Headers(response.headers);
   headers.set("X-Frame-Options", "SAMEORIGIN");
@@ -28,6 +38,43 @@ const withSafeHeaders = (response: Response) => {
     "Content-Security-Policy",
     "default-src 'self' https:; img-src 'self' https: data:; script-src 'self' https:; style-src 'self' https: 'unsafe-inline';"
   );
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+};
+
+const maybeRewriteLocation = (
+  response: Response,
+  requestUrl: URL,
+  originToRewrite: URL
+) => {
+  if (!isRedirectResponse(response)) {
+    return response;
+  }
+
+  const location = response.headers.get("Location");
+  if (!location) {
+    return response;
+  }
+
+  let target: URL | null = null;
+  try {
+    target = new URL(location);
+  } catch {
+    return response;
+  }
+
+  if (target.origin !== originToRewrite.origin) {
+    return response;
+  }
+
+  const headers = new Headers(response.headers);
+  target.protocol = requestUrl.protocol;
+  target.host = requestUrl.host;
+  headers.set("Location", target.toString());
+
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -70,15 +117,17 @@ const handleProxy = async (request: Request, env: Env) => {
     redirect: "manual",
   });
 
+  const maybeRewritten = maybeRewriteLocation(response, url, origin);
+
   const hasSetCookie = response.headers.has("Set-Cookie");
-  if (request.method === "GET" && response.ok && !hasSetCookie) {
-    const cacheResponse = new Response(response.body, response);
+  if (request.method === "GET" && maybeRewritten.ok && !hasSetCookie) {
+    const cacheResponse = new Response(maybeRewritten.body, maybeRewritten);
     cacheResponse.headers.set("Cache-Control", "public, max-age=300");
     await cache.put(cacheKey, cacheResponse.clone());
     return withSafeHeaders(cacheResponse);
   }
 
-  return withSafeHeaders(response);
+  return withSafeHeaders(maybeRewritten);
 };
 
 const handleNewApp = async (request: Request, env: Env) => {
