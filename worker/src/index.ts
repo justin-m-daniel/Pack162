@@ -5,8 +5,8 @@ type Env = {
   NEW_APP_ORIGIN: string;
 };
 
-const HTML_REWRITE_PATHS = ["/", "/home", "/node/2"];
-const NEW_APP_PATHS = ["/", "/home", "/node/2"];
+const HTML_REWRITE_PATHS = ["/home", "/node/2"];
+const NEW_APP_PATHS = ["/home", "/node/2"];
 const NEW_APP_PREFIXES = ["/assets", "/_static"];
 
 const isHtmlRequest = (request: Request) => {
