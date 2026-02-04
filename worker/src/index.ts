@@ -84,7 +84,18 @@ const handleProxy = async (request: Request, env: Env) => {
 const handleNewApp = async (request: Request, env: Env) => {
   const url = new URL(request.url);
   const targetUrl = new URL(url.pathname + url.search, env.NEW_APP_ORIGIN);
-  return fetch(targetUrl.toString(), request);
+  const headers = new Headers(request.headers);
+  headers.set("Host", targetUrl.host);
+  headers.set("Origin", targetUrl.origin);
+
+  const newRequest = new Request(targetUrl.toString(), {
+    method: request.method,
+    headers,
+    body: request.method === "GET" ? undefined : request.body,
+    redirect: "manual",
+  });
+
+  return fetch(newRequest);
 };
 
 export default {
