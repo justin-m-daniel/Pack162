@@ -166,7 +166,10 @@ export default {
       NEW_APP_PATHS.includes(url.pathname) ||
       NEW_APP_PREFIXES.some((prefix) => url.pathname.startsWith(prefix))
     ) {
-      return handleNewApp(request, env);
+      const newAppOrigin = new URL(env.NEW_APP_ORIGIN);
+      if (newAppOrigin.host !== url.host) {
+        return handleNewApp(request, env);
+      }
     }
 
     const response = await handleProxy(request, env);
