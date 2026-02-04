@@ -1,0 +1,10 @@
+name = "pack-legacy-proxy"
+main = "src/index.ts"
+compatibility_date = "2024-10-01"
+
+[vars]
+LEGACY_ORIGIN = "https://www.austinpack162.com"
+NEW_APP_ORIGIN = "https://pack162.justin-matthew-daniel1.workers.dev"
+
+[observability]
+enabled = true
