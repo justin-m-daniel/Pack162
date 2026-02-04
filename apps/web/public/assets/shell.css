@@ -1,0 +1,42 @@
+.pack-shell {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: #0f172a;
+  color: white;
+  padding: 12px 0;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.3);
+}
+
+.pack-shell__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.pack-shell__logo {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.pack-shell__nav {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pack-shell__nav a {
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.pack-shell__footer {
+  margin-top: 48px;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 32px 0;
+}
