@@ -29,15 +29,21 @@ const isRedirectResponse = (response: Response) => {
   );
 };
 
-const withSafeHeaders = (response: Response) => {
+const withSafeHeaders = (
+  response: Response,
+  options: { includeCsp?: boolean } = {}
+) => {
+  const { includeCsp = true } = options;
   const headers = new Headers(response.headers);
   headers.set("X-Frame-Options", "SAMEORIGIN");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("X-Content-Type-Options", "nosniff");
-  headers.set(
-    "Content-Security-Policy",
-    "default-src 'self' https:; img-src 'self' https: data:; script-src 'self' https:; style-src 'self' https: 'unsafe-inline';"
-  );
+  if (includeCsp) {
+    headers.set(
+      "Content-Security-Policy",
+      "default-src 'self' https:; img-src 'self' https: data:; script-src 'self' https:; style-src 'self' https: 'unsafe-inline';"
+    );
+  }
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -106,7 +112,7 @@ const handleProxy = async (request: Request, env: Env) => {
   if (request.method === "GET") {
     const cached = await cache.match(cacheKey);
     if (cached) {
-      return withSafeHeaders(cached);
+      return withSafeHeaders(cached, { includeCsp: false });
     }
   }
 
@@ -124,10 +130,10 @@ const handleProxy = async (request: Request, env: Env) => {
     const cacheResponse = new Response(maybeRewritten.body, maybeRewritten);
     cacheResponse.headers.set("Cache-Control", "public, max-age=300");
     await cache.put(cacheKey, cacheResponse.clone());
-    return withSafeHeaders(cacheResponse);
+    return withSafeHeaders(cacheResponse, { includeCsp: false });
   }
 
-  return withSafeHeaders(maybeRewritten);
+  return withSafeHeaders(maybeRewritten, { includeCsp: false });
 };
 
 const handleNewApp = async (request: Request, env: Env) => {
@@ -144,7 +150,8 @@ const handleNewApp = async (request: Request, env: Env) => {
     redirect: "manual",
   });
 
-  return fetch(newRequest);
+  const response = await fetch(newRequest);
+  return withSafeHeaders(response);
 };
 
 export default {
